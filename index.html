@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Dither Bloom — Finance Cards</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Newsreader:opsz,wght@6..72,400&display=swap" rel="stylesheet" />
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --backdrop: #d9d9d9;
+      --card: #ffffff;
+      --ink: #161616;
+      --muted: #6f6f6f;
+      --soft: #8a8a8a;
+      --line: #d6d6d6;
+      --stroke: #e7e7e7;
+      --lilac: #9a9bf0;
+      --green: #3ddc55;
+      --red: #e8394a;
+      --badge-bg: #fbdadd;
+      --badge-line: #f6b9c0;
+      --badge-ink: #e0465a;
+      --sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+      --serif: "Newsreader", "Times New Roman", serif;
+
+      /* Design unit: the reference frame is 928 × 690, so 1u = 1 reference px.
+         Everything below is sized in u so the composition scales as one piece. */
+      --u: min(calc(100vh / 690), calc(100vw / 928));
+    }
+
+    @supports (height: 100svh) {
+      :root {
+        --u: min(calc(100svh / 690), calc(100vw / 928));
+      }
+    }
+
+    html,
+    body {
+      height: 100%;
+      background: var(--backdrop);
+    }
+
+    body {
+      font-family: var(--sans);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+      background: none;
+      border: 0;
+      cursor: pointer;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--lilac);
+      outline-offset: 2px;
+    }
+
+    /* ---------- Section: 100vh stage ---------- */
+    .stage {
+      position: relative;
+      height: 100vh;
+      height: 100svh;
+      width: 100%;
+      overflow: hidden;
+      background: var(--backdrop);
+      isolation: isolate;
+    }
+
+    .stage__video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .deck {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: calc(var(--u) * 42);
+    }
+
+    /* ---------- Card ---------- */
+    .card {
+      flex: none;
+      width: calc(var(--u) * 288);
+      height: calc(var(--u) * 626);
+      padding: calc(var(--u) * 10);
+      background: var(--card);
+      border-radius: calc(var(--u) * 2);
+      box-shadow: 0 calc(var(--u) * 1) calc(var(--u) * 3) rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(calc(var(--u) * 14));
+      animation: card-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+    }
+
+    .card:nth-child(2) {
+      animation-delay: 0.12s;
+    }
+
+    @keyframes card-in {
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .card__media {
+      flex: none;
+      height: calc(var(--u) * 393);
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .card__media video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    .card__bar {
+      flex: none;
+      height: calc(var(--u) * 32);
+      padding: 0 calc(var(--u) * 4);
+      padding-right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: calc(var(--u) * 1) solid var(--line);
+    }
+
+    .card__eyebrow {
+      font-size: calc(var(--u) * 7.4);
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+    }
+
+    .chip {
+      height: calc(var(--u) * 19);
+      padding: 0 calc(var(--u) * 6) 0 calc(var(--u) * 7);
+      display: inline-flex;
+      align-items: center;
+      gap: calc(var(--u) * 6);
+      border: calc(var(--u) * 0.8) solid var(--stroke);
+      border-radius: calc(var(--u) * 4);
+      background: #fff;
+      font-size: calc(var(--u) * 7.4);
+      font-weight: 500;
+      white-space: nowrap;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .chip:hover,
+    .go:hover {
+      background: #f5f5f5;
+      border-color: #d9d9d9;
+    }
+
+    .chip svg {
+      width: calc(var(--u) * 8);
+      height: calc(var(--u) * 8);
+    }
+
+    .card__body {
+      flex: 1;
+      padding: 0 0 0 calc(var(--u) * 0);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .meta {
+      margin-top: calc(var(--u) * 19);
+      display: flex;
+      align-items: center;
+      gap: calc(var(--u) * 20);
+      font-size: calc(var(--u) * 7.4);
+      color: var(--muted);
+    }
+
+    .meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: calc(var(--u) * 6);
+    }
+
+    .meta svg {
+      width: calc(var(--u) * 7.5);
+      height: calc(var(--u) * 7.5);
+    }
+
+    .headline {
+      margin-top: calc(var(--u) * 13);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .headline h2 {
+      font-family: var(--serif);
+      font-weight: 400;
+      font-size: calc(var(--u) * 19);
+      line-height: 0.89;
+      letter-spacing: -0.035em;
+      color: var(--ink);
+    }
+
+    .today {
+      display: inline-flex;
+      align-items: center;
+      gap: calc(var(--u) * 7);
+      font-size: calc(var(--u) * 7.4);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .badge {
+      height: calc(var(--u) * 12);
+      padding: 0 calc(var(--u) * 3.5);
+      display: inline-flex;
+      align-items: center;
+      gap: calc(var(--u) * 2.5);
+      border: calc(var(--u) * 0.6) solid var(--badge-line);
+      border-radius: calc(var(--u) * 2);
+      background: var(--badge-bg);
+      color: var(--badge-ink);
+      font-size: calc(var(--u) * 5.6);
+      font-weight: 500;
+    }
+
+    .badge svg {
+      width: calc(var(--u) * 7);
+      height: calc(var(--u) * 5);
+    }
+
+    .copy {
+      margin-top: calc(var(--u) * 18);
+      white-space: nowrap;
+      font-size: calc(var(--u) * 7.5);
+      line-height: 1.27;
+      color: var(--soft);
+    }
+
+    .card__foot {
+      margin-top: auto;
+      padding-bottom: calc(var(--u) * 0);
+      display: flex;
+      align-items: center;
+    }
+
+    .donut {
+      flex: none;
+      width: calc(var(--u) * 41);
+      height: calc(var(--u) * 41);
+      border-radius: 50%;
+      -webkit-mask: radial-gradient(closest-side, transparent 69%, #000 71%);
+      mask: radial-gradient(closest-side, transparent 69%, #000 71%);
+      animation: donut-spin 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) 0.3s backwards;
+    }
+
+    .donut--delta {
+      background: conic-gradient(from 300deg, var(--green) 0deg, #55d556 22deg, var(--red) 100deg, var(--red) 150deg, var(--lilac) 150deg 360deg);
+    }
+
+    .donut--variance {
+      background: conic-gradient(from 215deg, var(--green) 0deg, var(--green) 125deg, var(--red) 195deg, var(--red) 240deg, var(--lilac) 240deg 360deg);
+    }
+
+    @keyframes donut-spin {
+      from {
+        transform: rotate(-140deg);
+        opacity: 0;
+      }
+    }
+
+    .card__metric {
+      margin-left: calc(var(--u) * 13);
+      font-size: calc(var(--u) * 7.4);
+      color: var(--soft);
+    }
+
+    .go {
+      margin-left: auto;
+      width: calc(var(--u) * 19);
+      height: calc(var(--u) * 19);
+      display: grid;
+      place-items: center;
+      border: calc(var(--u) * 0.8) solid var(--stroke);
+      border-radius: calc(var(--u) * 4);
+      background: #fff;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .go svg {
+      width: calc(var(--u) * 9);
+      height: calc(var(--u) * 9);
+      transition: transform 0.25s ease;
+    }
+
+    .go:hover svg {
+      transform: translateX(calc(var(--u) * 1.5));
+    }
+
+    /* ---------- Mobile / portrait: one card per view, swipe sideways ---------- */
+    @media (max-width: 760px), (max-aspect-ratio: 1/1) {
+      :root {
+        --u: min(calc(100vh / 690), calc(100vw / 326));
+      }
+
+      @supports (height: 100svh) {
+        :root {
+          --u: min(calc(100svh / 690), calc(100vw / 326));
+        }
+      }
+
+      .deck {
+        justify-content: flex-start;
+        gap: calc(var(--u) * 12);
+        padding: 0 calc((100vw - var(--u) * 288) / 2);
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        scroll-padding: 0 calc((100vw - var(--u) * 288) / 2);
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+
+      .deck::-webkit-scrollbar {
+        display: none;
+      }
+
+      .card {
+        scroll-snap-align: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card,
+      .donut {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="stage" aria-label="Capital insights">
+    <!-- Looping dither backdrop, generated + animated on Higgsfield (Seedance 2.5, 1080p, 16:9) -->
+    <video
+      class="stage__video"
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261010_060330_e4a1b52f-3513-4507-b188-27f00fde59db.mp4"
+      poster="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261010_060234_945704a8-fdd8-4d72-8961-7636bb49259b.png"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      aria-hidden="true"
+    ></video>
+
+    <div class="deck">
+      <article class="card card--bloom">
+        <div class="card__media">
+          <!-- Blooming dahlia loop, animated on Higgsfield (Seedance 2.5, 1080p) -->
+          <video
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261010_082409_818905f0-c0e9-44c5-a86e-28cfe7a956d1.mp4"
+            poster="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261010_060234_209d1b9f-2e45-493e-8bbc-1d1701f91092.png"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="auto"
+            aria-label="Lilac dithered dahlia blooming"
+          ></video>
+        </div>
+
+        <div class="card__bar">
+          <span class="card__eyebrow">My Card</span>
+          <button class="chip" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true">
+              <rect x="5.5" y="5.5" width="9" height="9" rx="2" />
+              <path d="M10.5 2.5h-6a2 2 0 0 0-2 2v6" stroke-linecap="round" />
+            </svg>
+            Add Card
+          </button>
+        </div>
+
+        <div class="card__body">
+          <div class="meta">
+            <span>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
+                <rect x="1.5" y="2.5" width="13" height="12" rx="2" />
+                <path d="M1.5 6.5h13M5 1v3M11 1v3" stroke-linecap="round" />
+              </svg>
+              Dec 05
+            </span>
+            <span>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="8" cy="8" r="6.5" />
+                <path d="M8 4.5V8l2.5 1.5" />
+              </svg>
+              11:00 AM
+            </span>
+          </div>
+
+          <div class="headline">
+            <h2>Capital<br />Metamorphosis</h2>
+            <span class="today">
+              Today
+              <span class="badge">
+                <svg viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M1 2l4 4 2.5-2.5L13 8.5" />
+                  <path d="M9.5 8.5H13V5" />
+                </svg>
+                6.2 %
+              </span>
+            </span>
+          </div>
+
+          <p class="copy">
+            Moving from static savings to active yield. Your<br />
+            cash flow is currently being re-indexed for<br />
+            maximum efficiency. Monitor the delta below.
+          </p>
+
+          <div class="card__foot">
+            <div class="donut donut--delta" role="img" aria-label="Efficiency delta chart"></div>
+            <span class="card__metric">Efficiency Delta</span>
+            <button class="go" type="button" aria-label="Open Capital Metamorphosis">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2.5 8h11M9.5 4l4 4-4 4" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <article class="card card--moth">
+        <div class="card__media">
+          <!-- Chrysalis-to-butterfly loop, animated on Higgsfield (Seedance 2.5, 1080p) -->
+          <video
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261010_082433_cf6df2c6-195d-42a2-bed8-14c0c134725d.mp4"
+            poster="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261010_082355_ccd76b6e-f900-4587-bec6-4dd84aeda103.png"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="auto"
+            aria-label="Dithered chrysalis becoming a butterfly"
+          ></video>
+        </div>
+
+        <div class="card__bar">
+          <span class="card__eyebrow">My Card</span>
+          <button class="chip" type="button">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true">
+              <rect x="5.5" y="5.5" width="9" height="9" rx="2" />
+              <path d="M10.5 2.5h-6a2 2 0 0 0-2 2v6" stroke-linecap="round" />
+            </svg>
+            Add Card
+          </button>
+        </div>
+
+        <div class="card__body">
+          <div class="meta">
+            <span>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
+                <rect x="1.5" y="2.5" width="13" height="12" rx="2" />
+                <path d="M1.5 6.5h13M5 1v3M11 1v3" stroke-linecap="round" />
+              </svg>
+              Dec 05
+            </span>
+            <span>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="8" cy="8" r="6.5" />
+                <path d="M8 4.5V8l2.5 1.5" />
+              </svg>
+              11:00 AM
+            </span>
+          </div>
+
+          <div class="headline">
+            <h2>Sensitive<br />Dependencies</h2>
+            <span class="today">
+              Today
+              <span class="badge">
+                <svg viewBox="0 0 14 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M1 2l4 4 2.5-2.5L13 8.5" />
+                  <path d="M9.5 8.5H13V5" />
+                </svg>
+                6.2 %
+              </span>
+            </span>
+          </div>
+
+          <p class="copy">
+            Your capital is a dynamic system. Even the most<br />
+            minute transaction ripples across your long-term<br />
+            liquidity. We track the divergence so you don't have to.
+          </p>
+
+          <div class="card__foot">
+            <div class="donut donut--variance" role="img" aria-label="Variance threshold chart"></div>
+            <span class="card__metric">Variance Threshold</span>
+            <button class="go" type="button" aria-label="Open Sensitive Dependencies">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2.5 8h11M9.5 4l4 4-4 4" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <script>
+    // Keep the loops running (some browsers pause muted autoplay)
+    (function () {
+      var videos = document.querySelectorAll(".stage video");
+      if (!videos.length) return;
+      var play = function () {
+        videos.forEach(function (video) {
+          video.muted = true;
+          var p = video.play();
+          if (p && p.catch) p.catch(function () {});
+        });
+      };
+      play();
+      document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) play();
+      });
+      document.addEventListener("touchstart", play, { once: true, passive: true });
+    })();
+  </script>
+</body>
+</html>
